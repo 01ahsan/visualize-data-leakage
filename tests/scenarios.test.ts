@@ -83,8 +83,11 @@ it('scenario ids are unique', () => {
 it('home-page previews match the simulations', async () => {
   const { previews, PREVIEW_SEED } = await import('../src/scenarios/previews');
   for (const s of scenarios) {
-    const e = s.evaluate({ leaky: true, strength: s.strength.default, seed: PREVIEW_SEED });
-    expect(previews[s.id].reported).toBeCloseTo(e.reportedScore, 2);
-    expect(previews[s.id].newHospital).toBeCloseTo(e.newHospitalScore, 2);
+    for (const leaky of [true, false]) {
+      const e = s.evaluate({ leaky, strength: s.strength.default, seed: PREVIEW_SEED });
+      const p = previews[s.id][leaky ? 'leaky' : 'correct'];
+      expect(p.reported).toBeCloseTo(e.reportedScore, 3);
+      expect(p.newHospital).toBeCloseTo(e.newHospitalScore, 3);
+    }
   }
 });

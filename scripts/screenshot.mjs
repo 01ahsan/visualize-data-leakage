@@ -42,7 +42,8 @@ const scenario = '#/scenario/feature-selection?mode=leaky&strength=1000&seed=42'
 await shoot(scenario, 'docs/screenshot.png', { width: 1100, height: 900 });
 
 if (!process.argv.includes('--readme-only')) {
-  await shoot('#/', 'scripts/output/home.png', { width: 1200, height: 900 });
+  await shoot('#/', 'scripts/output/home.png', { width: 1200, height: 900, fullPage: true });
+  await shoot('#/', 'scripts/output/home-mobile.png', { width: 360, height: 800, fullPage: true });
   await shoot(scenario, 'scripts/output/scenario-full.png', {
     width: 1200,
     height: 900,

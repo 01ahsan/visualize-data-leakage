@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { CodePanels } from '../components/CodePanels';
 import { CopyButton } from '../components/CopyButton';
 import { GapChart } from '../components/GapChart';
+import { ReadingTip } from '../components/ReadingTip';
 import { ScoreScale } from '../components/ScoreScale';
 import { Tabs } from '../components/Tabs';
 import { fmtGap, NOISE_BAND } from '../format';
@@ -83,6 +84,7 @@ export function ScenarioPage({ scenario: s, params, embed }: ScenarioPageProps) 
       </header>
 
       <section className={`stage ${leaky ? 'mode-leaky' : 'mode-correct'}`} aria-label="Simulation">
+        {!embed && <ReadingTip />}
         <div className="stage-controls">
           <div className="segmented" role="radiogroup" aria-label="Workflow">
             {[true, false].map((isLeaky) => (
