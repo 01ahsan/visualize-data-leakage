@@ -19,11 +19,11 @@ export default defineScenario({
   id: 'time-leakage',
   number: 6,
   title: 'Time leakage',
-  oneLiner: 'A random split lets the model learn from the future to predict the past.',
+  oneLiner: 'A random split mixes past and future.',
   medicalExample:
-    'Admissions from 2019 to 2023 are shuffled and split at random. Coding practice and treatment change over those years, and the model will be used on 2024 patients.',
+    'Admissions from 2019 to 2023 are shuffled and split. The model will run in 2024.',
   explanation:
-    'The rule linking the features to the outcome drifts over time, and the admission date is one of the columns. With a random split, every test row has training rows from the same weeks on both sides of it, so the model can interpolate the current rule. In deployment there is no future data to lean on. A forward split (train on the past, test on the next period) gives the model the same handicap it will have in deployment, so its score matches the next period. With no drift, both splits agree.',
+    'The link between features and outcome changes over time. A random split puts rows from the same weeks in train and test, so the model always sees the current rule. In use, the future is unseen. Train on the past and test on the next period. With no drift, both splits agree.',
   setup: `${ROWS} admissions over one period, 2 features plus the date, k-NN (k = 15). Leaky: 5-fold random split. Correct: ${TIME_SPLITS} forward-chaining splits. New hospital: ${NEW_HOSPITAL_ROWS} admissions from the next period.`,
   strength: {
     label: 'Drift speed',
@@ -32,7 +32,7 @@ export default defineScenario({
     step: 0.25,
     default: 1.5,
     format: (v) => v.toFixed(2),
-    hint: 'Faster drift makes the rule at prediction time differ more from the rules in training.',
+    hint: 'Faster drift, bigger gap.',
   },
   evaluate({ leaky, strength, seed }) {
     const opts = { drift: strength, signal: SIGNAL, timeScale: TIME_SCALE };

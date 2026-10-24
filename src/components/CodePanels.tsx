@@ -50,10 +50,7 @@ function Panel({
 export function CodePanels({ wrongCode, rightCode }: CodePanelsProps) {
   return (
     <>
-      <p className="muted small">
-        Both snippets run as they are with NumPy and scikit-learn. Highlighted lines differ between
-        the two.
-      </p>
+      <p className="code-note">Runs with NumPy and scikit-learn. Highlighted lines differ.</p>
       <div className="code-grid">
         <Panel title="Leaky" kind="wrong" code={wrongCode} other={rightCode} />
         <Panel title="Correct" kind="right" code={rightCode} other={wrongCode} />

@@ -16,11 +16,10 @@ export default defineScenario({
   id: 'same-patient',
   number: 1,
   title: 'Same patient in train and test',
-  oneLiner: 'Records from one person end up on both sides of the split.',
-  medicalExample:
-    'A hospital has several visits per patient. Splitting visits at random puts some of a patient’s visits in training and others in testing.',
+  oneLiner: 'Visits from one patient land in both train and test.',
+  medicalExample: 'A hospital has several visits per patient and splits the visits at random.',
   explanation:
-    'Visits from the same person look alike, so a model can recognise the patient instead of learning the disease. k-nearest neighbours does exactly that: the closest training rows to a test visit are that patient’s other visits, which carry the same diagnosis. The random split rewards this memory, and the score drops on patients the model has never seen. Split by patient (GroupKFold) so each person is entirely in training or entirely in testing. With one visit per patient there is nothing to memorise and both splits agree.',
+    'Visits from one patient look alike. With a random split, the model finds the same patient’s other visits in training and copies their diagnosis. On new patients that trick fails. Split by patient with GroupKFold. With one visit per patient, both splits agree.',
   setup: `${PATIENTS} patients, 8 features, k-NN (k = 10), 5-fold cross-validation. New hospital: ${NEW_PATIENTS} new patients.`,
   strength: {
     label: 'Visits per patient',
@@ -28,7 +27,7 @@ export default defineScenario({
     max: 6,
     step: 1,
     default: 4,
-    hint: 'More visits per patient give the model more chances to recognise a person.',
+    hint: 'More visits per patient, more to memorise.',
   },
   evaluate({ leaky, strength, seed }) {
     const visits = Math.round(strength);

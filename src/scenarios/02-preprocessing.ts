@@ -30,11 +30,11 @@ export default defineScenario({
   id: 'preprocessing',
   number: 2,
   title: 'Preprocessing on all data',
-  oneLiner: 'Imputation and scaling are fitted before the data is split.',
+  oneLiner: 'Imputation and scaling are fitted before the split.',
   medicalExample:
-    'Lab values with gaps are filled with the column mean and standardised for the whole cohort, and only then split into training and test sets.',
+    'Missing lab values are filled with the mean of the whole dataset, then the data is split.',
   explanation:
-    'Fitting the imputer and scaler on every row lets the test rows shape the means and standard deviations used in training. That is a real leak, but for mean imputation and scaling it carries very little information. In this simulation the leaky and correct versions differ by less than one point of AUC, even with 20 rows. The larger swings you see are ordinary sampling noise and small-sample pessimism of cross-validation, and they are the same in both modes. Other preprocessing leaks far more (see scenario 3). Use a Pipeline anyway: the fix costs nothing and protects you when a later step is less harmless.',
+    'The test rows shift the means and standard deviations used in training. Here the effect is tiny: under 0.01 AUC, even with 20 rows. The gap you see is mostly noise, and it is the same in both modes. Use a Pipeline anyway. It costs nothing.',
   setup: `Logistic regression with mean imputation and scaling, 5-fold cross-validation, averaged over repeated studies of the chosen size (${TOTAL_ROWS} rows in total). New hospital: ${NEW_HOSPITAL_ROWS} rows.`,
   strength: {
     label: 'Rows in the study',
@@ -42,7 +42,7 @@ export default defineScenario({
     max: 320,
     step: 10,
     default: 40,
-    hint: 'Fewer rows give the test fold more weight in the shared statistics.',
+    hint: 'Fewer rows give the test fold more weight.',
   },
   evaluate({ leaky, strength, seed }) {
     const n = Math.round(strength);

@@ -25,11 +25,11 @@ export default defineScenario({
   id: 'oversampling',
   number: 8,
   title: 'Oversampling before splitting',
-  oneLiner: 'Copies of rare cases are made first, so copies end up in the test set.',
+  oneLiner: 'Rare cases are copied before the split.',
   medicalExample:
-    'Only 15% of patients have the rare complication, so the minority rows are duplicated until the classes are balanced, and only then is the data split for cross-validation.',
+    '15% of patients have a complication. Their rows are copied until the classes balance, then the data is split.',
   explanation:
-    'Random oversampling copies minority rows. If you oversample before splitting, most rare cases in a test fold have identical copies in the training folds, and a model that looks at close neighbours simply recognises them. The reported score jumps, but new patients have no copies anywhere. Oversample (or use SMOTE) inside each training fold only, so test folds keep the real class balance and contain no copies. The more you oversample, the more copies leak across the split.',
+    'Oversampling copies minority rows. Do it before the split and test folds hold copies of training rows. A nearest-neighbour model recognises them. New patients are not copies. Oversample inside each training fold only.',
   setup: `${ROWS} rows with ${percent(PREVALENCE)} positives, 6 features, distance-weighted k-NN (k = 15), stratified 5-fold cross-validation. New hospital: ${NEW_HOSPITAL_ROWS} rows at the real class balance.`,
   strength: {
     label: 'Minority size after oversampling (share of majority)',
@@ -38,7 +38,7 @@ export default defineScenario({
     step: 0.05,
     default: 1,
     format: percent,
-    hint: 'More oversampling means more copies of each rare case on both sides of the split.',
+    hint: 'More copies, more leaks across the split.',
   },
   evaluate({ leaky, strength, seed }) {
     const base = makeTabular({ n: ROWS, ...TABULAR }, stream(seed, SALT.data));

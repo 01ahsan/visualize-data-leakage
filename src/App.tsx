@@ -91,12 +91,13 @@ export function App() {
         {content}
       </main>
       <footer className="site-footer">
-        <p>All data is synthetic and generated in your browser. No cookies, no tracking.</p>
+        <p>Synthetic data. No cookies. No tracking.</p>
         <p>
-          Code MIT, text CC BY 4.0.{' '}
+          Code MIT · Text CC BY 4.0
           {repo && (
             <>
-              <a href={repo}>Source on GitHub</a>.
+              {' · '}
+              <a href={repo}>GitHub</a>
             </>
           )}
         </p>

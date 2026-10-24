@@ -16,11 +16,10 @@ export default defineScenario({
   id: 'duplicates',
   number: 4,
   title: 'Duplicate records',
-  oneLiner: 'Copies of the same record land on both sides of the split.',
-  medicalExample:
-    'Records merged from two hospital systems contain the same admission twice, with tiny rounding differences, and nobody removes them before splitting.',
+  oneLiner: 'Copies of a record sit in both train and test.',
+  medicalExample: 'Two record systems are merged, and some admissions appear twice.',
   explanation:
-    'A near-copy of a test row in the training set is an answer key. A model that looks at close neighbours, like k-NN or a deep tree, scores that test row by reading off the copy’s label. The more rows are duplicated, the more test rows have a twin in training and the higher the score climbs, while the score on new patients does not move. Remove duplicates before splitting, or keep each original and its copies in the same fold.',
+    'A test row with a copy in training is easy. The model reads the copy’s label. New patients have no copies. Remove duplicates before splitting, or keep each record and its copies in the same fold.',
   setup: `${ROWS} original rows, 6 features, distance-weighted k-NN (k = 15), 5-fold cross-validation. New hospital: ${NEW_HOSPITAL_ROWS} rows without duplicates.`,
   strength: {
     label: 'Rows duplicated',
@@ -29,7 +28,7 @@ export default defineScenario({
     step: 0.05,
     default: 0.3,
     format: percent,
-    hint: 'A larger share of duplicated rows gives more test rows a twin in training.',
+    hint: 'More copies, more test rows with a twin in training.',
   },
   evaluate({ leaky, strength, seed }) {
     const base = makeTabular({ n: ROWS, ...TABULAR }, stream(seed, SALT.data));

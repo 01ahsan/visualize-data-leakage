@@ -84,11 +84,10 @@ export default defineScenario({
   id: 'test-set-tuning',
   number: 7,
   title: 'Tuning on the test set',
-  oneLiner: 'Many settings are tried and the best test score is reported.',
-  medicalExample:
-    'A team tries 20 combinations of features and regularisation for a readmission model, checks each one on the same 60 test patients, and publishes the best.',
+  oneLiner: 'Many settings are tried; the best test score is reported.',
+  medicalExample: 'A team tries 20 feature sets on the same 60 test patients and reports the best.',
   explanation:
-    'Every test score is the true performance plus some luck. Try enough settings and pick the highest, and you mostly pick the luckiest, so the reported number overstates what the chosen model will do. With a weak signal and a small test set, as here, the inflation is moderate: about five to eight points of AUC, growing slowly with more settings. Choose settings with a validation split (or cross-validation inside the training data), then evaluate the single chosen model once on a test set that played no part in any decision.',
+    'Each test score is skill plus luck. Pick the best of many and you pick the luckiest. Here the gain is moderate, about 0.06 AUC. Choose settings on validation data. Use the test set once, at the end.',
   setup: `${TRAIN_ROWS} training rows, ${TEST_ROWS} test rows, weak signal, logistic regression with random feature subsets and penalties, averaged over ${REPEATS} studies. Correct: chosen on a ${VALIDATION_ROWS}-row validation split. New hospital: ${NEW_HOSPITAL_ROWS} rows.`,
   strength: {
     label: 'Settings tried',
@@ -96,7 +95,7 @@ export default defineScenario({
     max: MAX_SETTINGS,
     step: 1,
     default: 20,
-    hint: 'Each extra setting is another lottery ticket for a lucky test score.',
+    hint: 'More settings, more luck to pick from.',
   },
   evaluate({ leaky, strength, seed }) {
     const k = Math.round(strength);

@@ -6,22 +6,13 @@ import { scenarios } from '../scenarios';
 import { previews } from '../scenarios/previews';
 
 const STEPS = [
-  {
-    title: 'Pick a mistake',
-    text: 'Eight common ways test information sneaks into training, from duplicate records to tuning on the test set.',
-  },
-  {
-    title: 'Flip the switch',
-    text: 'Run the same study the leaky way and the correct way, and turn the leak up with a slider.',
-  },
-  {
-    title: 'Watch the gap',
-    text: 'Orange is the score the analysis would publish. Green is what the model really scores on new patients.',
-  },
+  { title: 'Pick a leak', text: 'Eight common mistakes.' },
+  { title: 'Flip the switch', text: 'Leaky or correct. Move the slider.' },
+  { title: 'Read the gap', text: 'Reported score against new patients.' },
 ];
 
-const scrollToScenarios = () => {
-  const el = document.getElementById('scenarios-title');
+const scrollToLeaks = () => {
+  const el = document.getElementById('leaks-title');
   el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   el?.focus({ preventScroll: true });
 };
@@ -31,91 +22,94 @@ export function Home() {
     <>
       <section className="hero">
         <div className="hero-text">
-          <p className="hero-kicker">An interactive guide to data leakage</p>
-          <h1>See how a machine learning score can mislead, and how to stop it.</h1>
+          <h1>
+            Your test score says <span className="hero-up">0.89</span>.
+            <br />
+            New patients say <span className="hero-real">0.50</span>.
+          </h1>
           <p className="lede">
-            A leak makes a model look better in testing than it will ever be in practice. Switch
-            leaks on and off and watch the reported score pull away from reality, right in your
-            browser.
+            Data leakage makes models look better than they are. See eight common leaks, switch them
+            on and off, and fix them.
           </p>
           <div className="hero-actions">
-            <button type="button" className="cta" onClick={scrollToScenarios}>
-              Explore the 8 leaks ↓
+            <button type="button" className="cta" onClick={scrollToLeaks}>
+              See the eight leaks
             </button>
-            <span className="hero-facts">Free · no sign-up · nothing leaves your browser</span>
+            <span className="hero-facts">Free. Runs in your browser.</span>
           </div>
         </div>
         <HeroDemo />
       </section>
 
-      <section className="how" aria-labelledby="how-title">
-        <h2 id="how-title">How it works</h2>
-        <ol className="steps">
-          {STEPS.map((s, i) => (
-            <li key={s.title}>
-              <span className="step-number" aria-hidden="true">
-                {i + 1}
-              </span>
-              <span className="step-title">{s.title}</span>
-              <span className="step-text">{s.text}</span>
-            </li>
-          ))}
-        </ol>
-        <p className="how-note">
-          Every scenario also shows the wrong and the right scikit-learn code side by side, so you
-          can fix the same mistake in your own work. Made for students, reviewers and teachers; each
-          demo can be embedded in a course page.
-        </p>
-      </section>
+      <ol className="steps" aria-label="How it works">
+        {STEPS.map((s, i) => (
+          <li key={s.title}>
+            <span className="step-number" aria-hidden="true">
+              0{i + 1}
+            </span>
+            <span className="step-title">{s.title}</span>
+            <span className="step-text">{s.text}</span>
+          </li>
+        ))}
+      </ol>
 
-      <section aria-labelledby="scenarios-title" className="scenarios-section">
-        <h2 id="scenarios-title" tabIndex={-1}>
-          The eight leaks
-        </h2>
-        <p className="section-sub">
-          Each card shows the leaky workflow at default settings:{' '}
-          <span className="dot dot-leaky" aria-hidden="true" />
-          reported score vs <span className="dot dot-new" aria-hidden="true" />
-          new hospital score (ROC AUC).
-        </p>
-        <ul className="card-grid">
+      <section aria-labelledby="leaks-title" className="leaks">
+        <div className="leaks-head">
+          <h2 id="leaks-title" tabIndex={-1}>
+            The eight leaks
+          </h2>
+          <p className="leaks-key">
+            <span>
+              <span className="dot dot-leaky" aria-hidden="true" />
+              reported
+            </span>
+            <span>
+              <span className="dot dot-new" aria-hidden="true" />
+              new patients
+            </span>
+          </p>
+        </div>
+        <ul className="leak-list">
           {scenarios.map((s) => {
             const p = previews[s.id]?.leaky;
             const gap = p ? p.reported - p.newHospital : 0;
             return (
               <li key={s.id}>
-                <a className="card" href={scenarioHash(s.id)}>
-                  <span className="card-top">
-                    <span className="card-number">{s.number}</span>
-                    {p && (
-                      <span
-                        className={Math.abs(gap) < NOISE_BAND ? 'card-gap card-gap-ok' : 'card-gap'}
-                        title="Gap between reported and new hospital score"
-                      >
-                        {fmtGap(gap)}
-                      </span>
-                    )}
+                <a className="leak-row" href={scenarioHash(s.id)}>
+                  <span className="leak-number">{String(s.number).padStart(2, '0')}</span>
+                  <span className="leak-text">
+                    <span className="leak-title">{s.title}</span>
+                    <span className="leak-line">{s.oneLiner}</span>
                   </span>
-                  <span className="card-title">{s.title}</span>
-                  <span className="card-text">{s.oneLiner}</span>
                   {p && (
-                    <>
+                    <span className="leak-viz">
                       <MiniScale reported={p.reported} newHospital={p.newHospital} />
-                      <span className="card-scores">
-                        <span>reported {fmtScore(p.reported)}</span>
-                        <span>new {fmtScore(p.newHospital)}</span>
+                      <span className="leak-scores">
+                        {fmtScore(p.reported)} → {fmtScore(p.newHospital)}
                       </span>
-                    </>
+                    </span>
+                  )}
+                  {p && (
+                    <span
+                      className={Math.abs(gap) < NOISE_BAND ? 'leak-gap leak-gap-ok' : 'leak-gap'}
+                    >
+                      {fmtGap(gap)}
+                    </span>
                   )}
                 </a>
               </li>
             );
           })}
         </ul>
-        <p className="home-note">
-          Before you trust your own score, run the <a href="#/checklist">eight-point checklist</a>.
-        </p>
       </section>
+
+      <a className="banner" href="#/checklist">
+        <span className="banner-title">Check your own project</span>
+        <span className="banner-text">Eight questions. One printable page.</span>
+        <span className="banner-arrow" aria-hidden="true">
+          →
+        </span>
+      </a>
     </>
   );
 }

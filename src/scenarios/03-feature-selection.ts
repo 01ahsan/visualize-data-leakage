@@ -18,11 +18,11 @@ export default defineScenario({
   id: 'feature-selection',
   number: 3,
   title: 'Feature selection on all data',
-  oneLiner: 'The “most predictive” features are chosen using the test rows too.',
+  oneLiner: 'Features are picked using every row, test rows included.',
   medicalExample:
-    'A study with 80 patients and a thousand gene-expression measurements picks the 10 genes most correlated with the outcome, then cross-validates a model on those 10 genes.',
+    '80 patients, 1,000 gene measurements. Keep the 10 genes most correlated with the outcome, then cross-validate.',
   explanation:
-    'Here every feature is pure noise and the labels are coin flips, so the honest answer is 50%. With thousands of candidates, some correlate with the labels by chance, and when the selection sees every row, those chance patterns include the test rows. Cross-validation then confirms a pattern it helped create. Selecting inside each training fold removes the effect, and the score sits near 50%, as it should. The more candidate features, the more chance correlations to find.',
+    'Every feature is noise and the labels are coin flips, so the true AUC is 0.5. Some features match the labels by chance. Pick them on all rows and cross-validation rewards the chance match. Pick them inside each training fold and the score drops back to 0.5.',
   setup: `${ROWS} rows, random labels, top ${SELECTED} features by correlation, logistic regression, 5-fold cross-validation, averaged over ${REPEATS} studies. New hospital: ${NEW_HOSPITAL_ROWS} rows.`,
   strength: {
     label: 'Candidate features',
@@ -30,7 +30,7 @@ export default defineScenario({
     max: 3000,
     step: 100,
     default: 1000,
-    hint: 'More candidate features mean more chance correlations to pick from.',
+    hint: 'More features, more chance matches.',
   },
   evaluate({ leaky, strength, seed }) {
     const p = Math.round(strength);
@@ -90,5 +90,5 @@ y = rng.integers(0, 2, 80)        # coin-flip labels
 # Right: selection is refitted inside each training fold
 model = make_pipeline(SelectKBest(f_classif, k=10), LogisticRegression())
 auc = cross_val_score(model, X, y, cv=5, scoring="roc_auc")
-print(f"Reported AUC: {auc.mean():.2f}")  # chance level; one 80-row study can land 0.15 either side`,
+print(f"Reported AUC: {auc.mean():.2f}")  # near 0.5`,
 });

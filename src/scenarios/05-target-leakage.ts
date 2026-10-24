@@ -20,11 +20,11 @@ export default defineScenario({
   id: 'target-leakage',
   number: 5,
   title: 'Target leakage',
-  oneLiner: 'A feature that is only recorded after the outcome is used to predict it.',
+  oneLiner: 'A feature recorded after the outcome is used to predict it.',
   medicalExample:
-    'A sepsis model uses “antibiotics given” as a feature. Antibiotics are given because sepsis was diagnosed, so the column encodes the answer.',
+    'A sepsis model uses “antibiotics given”. Antibiotics are given because of sepsis.',
   explanation:
-    'One column here is computed from the outcome plus noise, like a treatment that only happens after a diagnosis. In the historical table it is always filled in, so cross-validation rewards the model for leaning on it. At prediction time, before the outcome is known, the column does not exist yet. In the new hospital it is filled with the training average, and the model is left with the weak real signal and weights tuned for a column that is gone. Before training, ask of every feature: would I know this at the moment of prediction?',
+    'One column is filled in because of the outcome. In the training table it gives the answer away. At prediction time it does not exist yet, so the model is left with a weak signal. For every feature, ask: would I have this when I make the prediction?',
   setup: `${ROWS} rows, 8 real features plus 1 late feature, logistic regression, 5-fold cross-validation. New hospital: ${NEW_HOSPITAL_ROWS} rows, late feature unavailable (filled with the training mean).`,
   strength: {
     label: 'How closely the late feature tracks the outcome',
@@ -33,7 +33,7 @@ export default defineScenario({
     step: 0.25,
     default: 2,
     format: (v) => v.toFixed(2),
-    hint: 'A stronger late feature makes the model rely on it more, and fail harder without it.',
+    hint: 'The stronger the late feature, the harder the fall.',
   },
   evaluate({ leaky, strength, seed }) {
     const base = makeTabular({ n: ROWS, ...TABULAR }, stream(seed, SALT.data));

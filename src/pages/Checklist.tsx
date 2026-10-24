@@ -3,64 +3,64 @@ import { scenarioHash } from '../router';
 
 const CHECKS: { title: string; detail: string; scenario: string }[] = [
   {
-    title: 'No person (or other unit) appears on both sides of a split.',
-    detail: 'Split by patient, site or device with GroupKFold when one unit has several rows.',
+    title: 'No patient appears on both sides of a split.',
+    detail: 'Use GroupKFold when one patient has several rows.',
     scenario: 'same-patient',
   },
   {
-    title: 'Every preprocessing step is fitted on training data only.',
-    detail: 'Imputation, scaling and encoding live inside a Pipeline that cross-validation refits.',
+    title: 'Preprocessing is fitted on training data only.',
+    detail: 'Put imputation, scaling and encoding in a Pipeline.',
     scenario: 'preprocessing',
   },
   {
-    title: 'Feature selection happens inside the cross-validation loop.',
-    detail:
-      'Selecting features on all rows, then cross-validating, can make pure noise look predictive.',
+    title: 'Feature selection runs inside cross-validation.',
+    detail: 'Never select on all rows first.',
     scenario: 'feature-selection',
   },
   {
-    title: 'Duplicates and near-duplicates are removed or grouped before splitting.',
-    detail: 'Check record ids, merged sources and repeated measurements.',
+    title: 'Duplicates are removed before splitting.',
+    detail: 'Check record IDs and merged sources.',
     scenario: 'duplicates',
   },
   {
-    title: 'Every feature is available at the moment of prediction.',
-    detail:
-      'Drop anything recorded after the outcome, such as treatments, discharge codes or length of stay.',
+    title: 'Every feature exists at prediction time.',
+    detail: 'Drop anything recorded after the outcome.',
     scenario: 'target-leakage',
   },
   {
     title: 'Time-ordered data is split by time.',
-    detail: 'Train on the past, test on a later period, as the model will be used.',
+    detail: 'Train on the past, test on what follows.',
     scenario: 'time-leakage',
   },
   {
-    title: 'The test set is used once, after every choice is made.',
-    detail: 'Tune models, features and thresholds on validation data or nested cross-validation.',
+    title: 'The test set is used once.',
+    detail: 'Tune on validation data or with nested cross-validation.',
     scenario: 'test-set-tuning',
   },
   {
-    title: 'Resampling is applied to training folds only.',
-    detail: 'Oversampling, undersampling and SMOTE never touch the test fold.',
+    title: 'Resampling touches training folds only.',
+    detail: 'Oversampling and SMOTE stay out of the test fold.',
     scenario: 'oversampling',
   },
 ];
 
 export function Checklist() {
   useEffect(() => {
-    document.title = 'Leakage checklist · Data Leakage Playground';
+    document.title = 'Checklist · Data Leakage Playground';
   }, []);
   return (
     <article className="checklist">
-      <header>
-        <h1>Data leakage checklist</h1>
-        <p className="lede">Eight checks to run before you trust a validation score.</p>
-        <div className="print-fields" aria-hidden="true">
-          <span>Project: ______________________________</span>
-          <span>Date: ______________</span>
+      <header className="checklist-head">
+        <div>
+          <h1>Leakage checklist</h1>
+          <p className="lede">Eight questions before you trust a score.</p>
+          <div className="print-fields" aria-hidden="true">
+            <span>Project: ______________________________</span>
+            <span>Date: ______________</span>
+          </div>
         </div>
-        <button type="button" className="button no-print" onClick={() => window.print()}>
-          Print this checklist
+        <button type="button" className="cta no-print" onClick={() => window.print()}>
+          Print
         </button>
       </header>
       <ol className="checks">
@@ -74,16 +74,16 @@ export function Checklist() {
               <p className="check-detail">
                 {c.detail}{' '}
                 <a className="no-print" href={scenarioHash(c.scenario)}>
-                  See the demo
+                  Demo
                 </a>
               </p>
             </div>
           </li>
         ))}
       </ol>
-      <p className="muted small print-footer">
-        From Data Leakage Playground. Based on the leakage taxonomy and REFORMS checklist from
-        Princeton (reproducible.cs.princeton.edu). Text licensed CC BY 4.0.
+      <p className="print-footer">
+        Data Leakage Playground. Based on the Princeton leakage taxonomy and REFORMS checklist
+        (reproducible.cs.princeton.edu). CC BY 4.0.
       </p>
     </article>
   );

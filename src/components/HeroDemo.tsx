@@ -35,7 +35,7 @@ export function HeroDemo() {
     <figure className={`hero-demo stage ${leaky ? 'mode-leaky' : 'mode-correct'}`}>
       <figcaption className="demo-caption">
         <span className="demo-live" aria-hidden="true" />
-        Live example: 1,000 random features, coin-flip labels
+        Live: 1,000 noise features, coin-flip labels
       </figcaption>
       <div className="segmented" role="radiogroup" aria-label="Workflow in the example">
         {[true, false].map((v) => (
@@ -53,11 +53,11 @@ export function HeroDemo() {
         <span className={`gap-pill ${Math.abs(gap) < 0.05 ? 'gap-ok' : 'gap-up'}`}>
           {fmtGap(gap)}
         </span>
-        {leaky ? 'The analysis claims far more than new patients get.' : 'Claim and reality agree.'}
+        {leaky ? 'Reported far above reality.' : 'Reported matches reality.'}
       </p>
       <ScoreScale reported={p.reported} newHospital={p.newHospital} leaky={leaky} />
       <a className="demo-link" href={scenarioHash(DEMO_ID)}>
-        Try it with the slider and the code →
+        Open this leak →
       </a>
     </figure>
   );

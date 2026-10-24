@@ -4,7 +4,6 @@ import { CopyButton } from '../components/CopyButton';
 import { GapChart } from '../components/GapChart';
 import { ReadingTip } from '../components/ReadingTip';
 import { ScoreScale } from '../components/ScoreScale';
-import { Tabs } from '../components/Tabs';
 import { fmtGap, NOISE_BAND } from '../format';
 import { appBaseUrl, scenarioHash, type ScenarioState } from '../router';
 import { scenarios } from '../scenarios';
@@ -31,11 +30,9 @@ function readState(s: ScenarioDef, params: URLSearchParams): ScenarioState {
 }
 
 function verdict(gap: number | null): string {
-  if (gap === null) return 'Running the simulation…';
-  if (Math.abs(gap) < NOISE_BAND) return 'Reported score matches new patients, within noise';
-  return gap > 0
-    ? 'Reported score is higher than new patients will see'
-    : 'Reported score is lower than new patients will see';
+  if (gap === null) return 'Running…';
+  if (Math.abs(gap) < NOISE_BAND) return 'Within noise. The score holds up.';
+  return gap > 0 ? 'Too high. New patients get less.' : 'Too low. New patients get more.';
 }
 
 interface ScenarioPageProps {
@@ -62,7 +59,7 @@ export function ScenarioPage({ scenario: s, params, embed }: ScenarioPageProps) 
 
   const shareUrl = `${appBaseUrl()}${scenarioHash(s.id, state)}`;
   const embedUrl = `${appBaseUrl()}${scenarioHash(s.id, { ...state, embed: true })}`;
-  const embedCode = `<iframe src="${embedUrl}" title="${s.title} (Data Leakage Playground)" width="100%" height="720" style="border:0" loading="lazy"></iframe>`;
+  const embedCode = `<iframe src="${embedUrl}" title="${s.title} (Data Leakage Playground)" width="100%" height="760" style="border:0" loading="lazy"></iframe>`;
   const index = scenarios.findIndex((x) => x.id === s.id);
   const prev = scenarios[index - 1];
   const next = scenarios[index + 1];
@@ -70,22 +67,24 @@ export function ScenarioPage({ scenario: s, params, embed }: ScenarioPageProps) 
   const update = (patch: Partial<ScenarioState>) =>
     setState((prevState) => ({ ...prevState, ...patch }));
   const gapKind = gap === null || Math.abs(gap) < NOISE_BAND ? 'ok' : gap > 0 ? 'up' : 'down';
+  const pct = ((strength - s.strength.min) / (s.strength.max - s.strength.min)) * 100;
 
   return (
-    <article className={embed ? 'scenario embed' : 'scenario'}>
-      <header className="scenario-head">
+    <article
+      className={`scenario ${embed ? 'embed' : ''} ${leaky ? 'mode-leaky' : 'mode-correct'}`}
+    >
+      <div className="scenario-head">
         <p className="eyebrow">
-          {!embed && <a href="#/">Scenarios</a>}
+          {!embed && <a href="#/">All leaks</a>}
           {!embed && <span aria-hidden="true"> / </span>}
-          {s.number} of {scenarios.length}
+          {String(s.number).padStart(2, '0')}
         </p>
         <h1>{s.title}</h1>
         <p className="lede">{s.oneLiner}</p>
-      </header>
 
-      <section className={`stage ${leaky ? 'mode-leaky' : 'mode-correct'}`} aria-label="Simulation">
         {!embed && <ReadingTip />}
-        <div className="stage-controls">
+
+        <div className="controls" aria-label="Simulation controls" role="group">
           <div className="segmented" role="radiogroup" aria-label="Workflow">
             {[true, false].map((isLeaky) => (
               <label
@@ -117,41 +116,40 @@ export function ScenarioPage({ scenario: s, params, embed }: ScenarioPageProps) 
               step={s.strength.step}
               value={strength}
               aria-valuetext={fmt(strength)}
-              style={
-                {
-                  '--pct': `${((strength - s.strength.min) / (s.strength.max - s.strength.min)) * 100}%`,
-                } as React.CSSProperties
-              }
               aria-describedby="strength-hint"
+              style={{ '--pct': `${pct}%` } as React.CSSProperties}
               onChange={(e) => update({ strength: Number(Number(e.target.value).toFixed(6)) })}
             />
-            <span id="strength-hint" className="visually-hidden">
+            <p id="strength-hint" className="hint">
               {s.strength.hint}
-            </span>
+            </p>
           </div>
-
-          <button
-            type="button"
-            className="ghost-button"
-            onClick={() => update({ seed: Math.floor(Math.random() * 100000) })}
-            title={`Draw a new synthetic dataset (seed ${seed})`}
-          >
-            <span aria-hidden="true">↻</span> New data
-          </button>
         </div>
 
         <p className="verdict" aria-live="polite">
           <span className={`gap-pill gap-${gapKind}`}>{gap === null ? '…' : fmtGap(gap)}</span>
           <span>{verdict(gap)}</span>
         </p>
+      </div>
 
+      <section className="viz-card" aria-label="Results">
+        <div className="viz-top">
+          <span className="viz-label">Score, ROC AUC</span>
+          <button
+            type="button"
+            className="ghost-button"
+            onClick={() => update({ seed: Math.floor(Math.random() * 100000) })}
+            title={`Seed ${seed}`}
+          >
+            <span aria-hidden="true">↻</span> New data
+          </button>
+        </div>
         <ScoreScale
           reported={sim.result?.reportedScore ?? null}
           newHospital={sim.result?.newHospitalScore ?? null}
           leaky={leaky}
         />
-
-        <h2 className="stage-subtitle">Gap as {s.strength.label.toLowerCase()} changes</h2>
+        <h2 className="viz-label viz-label-chart">Gap across the slider</h2>
         <GapChart
           leakyCurve={sim.leakyCurve}
           correctCurve={sim.correctCurve}
@@ -171,66 +169,30 @@ export function ScenarioPage({ scenario: s, params, embed }: ScenarioPageProps) 
         </p>
       ) : (
         <>
-          <Tabs
-            label="Details"
-            tabs={[
-              {
-                id: 'why',
-                label: 'Why it happens',
-                content: (
-                  <div className="why">
-                    <p className="explanation">{s.explanation}</p>
-                    <p className="example">
-                      <strong>In practice: </strong>
-                      {s.medicalExample}
-                    </p>
-                    <p className="setup">
-                      <strong>Simulation:</strong> {s.setup} Scores are ROC AUC; seed {seed}.
-                    </p>
-                  </div>
-                ),
-              },
-              {
-                id: 'code',
-                label: 'The code',
-                content: <CodePanels wrongCode={s.wrongCode} rightCode={s.rightCode} />,
-              },
-              {
-                id: 'share',
-                label: 'Share',
-                content: (
-                  <div className="share">
-                    <label htmlFor="share-url">Link to this exact view</label>
-                    <div className="copy-field">
-                      <input
-                        id="share-url"
-                        readOnly
-                        value={shareUrl}
-                        onFocus={(e) => e.target.select()}
-                      />
-                      <CopyButton text={shareUrl} label="Copy link" />
-                    </div>
-                    <label htmlFor="embed-code">Embed on a course page (compact view)</label>
-                    <div className="copy-field">
-                      <textarea
-                        id="embed-code"
-                        readOnly
-                        rows={3}
-                        value={embedCode}
-                        onFocus={(e) => e.target.select()}
-                      />
-                      <CopyButton text={embedCode} label="Copy embed" />
-                    </div>
-                  </div>
-                ),
-              },
-            ]}
-          />
+          <div className="scenario-notes">
+            <h2>Why</h2>
+            <p className="explanation">{s.explanation}</p>
+            <p className="example">
+              <span className="tag">Example</span> {s.medicalExample}
+            </p>
+            <p className="setup">
+              <span className="tag">Setup</span> {s.setup} Seed {seed}.
+            </p>
+            <div className="share-buttons">
+              <CopyButton text={shareUrl} label="Copy link" />
+              <CopyButton text={embedCode} label="Copy embed code" />
+            </div>
+          </div>
 
-          <nav className="pager" aria-label="Other scenarios">
+          <section className="code-section" aria-labelledby="code-title">
+            <h2 id="code-title">The code</h2>
+            <CodePanels wrongCode={s.wrongCode} rightCode={s.rightCode} />
+          </section>
+
+          <nav className="pager" aria-label="Other leaks">
             {prev ? (
               <a href={scenarioHash(prev.id)} rel="prev">
-                <span className="pager-dir">← Previous</span>
+                <span className="pager-dir">← {String(prev.number).padStart(2, '0')}</span>
                 {prev.title}
               </a>
             ) : (
@@ -238,13 +200,13 @@ export function ScenarioPage({ scenario: s, params, embed }: ScenarioPageProps) 
             )}
             {next ? (
               <a href={scenarioHash(next.id)} rel="next" className="pager-next">
-                <span className="pager-dir">Next →</span>
+                <span className="pager-dir">{String(next.number).padStart(2, '0')} →</span>
                 {next.title}
               </a>
             ) : (
               <a href="#/checklist" className="pager-next">
-                <span className="pager-dir">Finally →</span>
-                Printable checklist
+                <span className="pager-dir">Next →</span>
+                Checklist
               </a>
             )}
           </nav>

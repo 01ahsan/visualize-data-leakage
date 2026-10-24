@@ -10,7 +10,7 @@ function readDismissed(): boolean {
   }
 }
 
-/** A short, dismissible guide to the scenario page, shown until the visitor closes it. */
+/** A one-line guide to the scenario page, shown until the visitor closes it. */
 export function ReadingTip() {
   const [dismissed, setDismissed] = useState(readDismissed);
   if (dismissed) return null;
@@ -24,20 +24,13 @@ export function ReadingTip() {
   };
   return (
     <aside className="reading-tip" aria-label="How to read this page">
-      <ol>
-        <li>
-          <strong>Switch</strong> between the leaky and the correct workflow.
-        </li>
-        <li>
-          <strong>Drag</strong> the slider to make the leak stronger or weaker.
-        </li>
-        <li>
-          <strong>Compare</strong> the orange or blue dot (the score the study reports) with the
-          green dot (the score on new patients). The wider the gap, the more the score misleads.
-        </li>
-      </ol>
-      <button type="button" className="button" onClick={close}>
-        Got it
+      <p>
+        Flip the switch, move the slider. <span className="dot dot-leaky" aria-hidden="true" />
+        Reported vs <span className="dot dot-new" aria-hidden="true" />
+        real.
+      </p>
+      <button type="button" className="tip-close" onClick={close} aria-label="Hide tip">
+        ×
       </button>
     </aside>
   );
