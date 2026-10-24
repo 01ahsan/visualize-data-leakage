@@ -2,7 +2,7 @@
 
 **Switch a machine learning leak on and off, watch the reported score inflate, then see what a new hospital would really get.**
 
-**Live demo:** https://YOUR-GITHUB-USERNAME.github.io/data-leakage-playground/
+**Live demo:** https://01ahsan.github.io/Data-Leakage-Playground/
 
 ![Scenario page: feature selection on all data. The leaky workflow reports an AUC of 0.89; the same model scores 0.50 on new data.](docs/screenshot.png)
 
@@ -42,7 +42,7 @@ Requires Node.js 18 or newer.
 
 ```sh
 npm install
-npm run dev        # http://localhost:5173/data-leakage-playground/
+npm run dev        # http://localhost:5173/Data-Leakage-Playground/
 npm run check      # lint, type-check and tests
 npm run build      # production build in dist/
 npm run preview    # serve the production build

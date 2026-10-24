@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 
 // GitHub Pages serves the site from /<repository-name>/.
 // Change this if you rename the repository.
-const REPO_NAME = 'data-leakage-playground';
+const REPO_NAME = 'Data-Leakage-Playground';
 
 export default defineConfig({
   base: `/${REPO_NAME}/`,
