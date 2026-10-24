@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+  <rect width="1280" height="640" fill="#1a1a19"/>
+  <g font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif">
+    <text x="80" y="128" fill="#f0efec" font-size="64" font-weight="700">Data Leakage Playground</text>
+    <text x="80" y="188" fill="#c3c2b7" font-size="30">Switch a leak on and off. Watch the reported score inflate.</text>
+    <text x="80" y="230" fill="#c3c2b7" font-size="30">Then see what a new hospital would really get.</text>
+
+    <!-- Meters -->
+    <g transform="translate(80 300)">
+      <rect width="320" height="150" rx="14" fill="#222221" stroke="#3a3a37"/>
+      <text x="24" y="44" fill="#c3c2b7" font-size="24" font-weight="600">Reported score</text>
+      <text x="296" y="48" fill="#f0efec" font-size="44" font-weight="700" text-anchor="end">0.89</text>
+      <rect x="24" y="80" width="272" height="16" rx="8" fill="#2b2b29"/>
+      <rect x="24" y="80" width="242" height="16" rx="8" fill="#d95926"/>
+      <text x="24" y="130" fill="#a3a297" font-size="20">leaky cross-validation</text>
+    </g>
+    <g transform="translate(424 300)">
+      <rect width="320" height="150" rx="14" fill="#222221" stroke="#3a3a37"/>
+      <text x="24" y="44" fill="#c3c2b7" font-size="24" font-weight="600">New hospital</text>
+      <text x="296" y="48" fill="#f0efec" font-size="44" font-weight="700" text-anchor="end">0.50</text>
+      <rect x="24" y="80" width="272" height="16" rx="8" fill="#2b2b29"/>
+      <rect x="24" y="80" width="136" height="16" rx="8" fill="#8f8e86"/>
+      <text x="24" y="130" fill="#a3a297" font-size="20">fresh synthetic data</text>
+    </g>
+
+    <!-- Gap chart -->
+    <g transform="translate(800 300)">
+      <rect width="400" height="250" rx="14" fill="#222221" stroke="#3a3a37"/>
+      <text x="24" y="40" fill="#c3c2b7" font-size="22" font-weight="600">Gap: reported − new hospital</text>
+      <rect x="24" y="178" width="352" height="28" fill="#f0efec" fill-opacity="0.08"/>
+      <line x1="24" x2="376" y1="192" y2="192" stroke="#a3a297"/>
+      <polyline points="34,120 90,96 146,84 202,80 258,82 314,78 366,72" fill="none" stroke="#d95926" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+      <polyline points="34,192 90,196 146,191 202,193 258,195 314,192 366,191" fill="none" stroke="#3987e5" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+      <text x="366" y="62" fill="#f0efec" font-size="18" text-anchor="end">Leaky</text>
+      <text x="366" y="230" fill="#f0efec" font-size="18" text-anchor="end">Correct</text>
+    </g>
+
+    <text x="80" y="520" fill="#f0efec" font-size="26" font-weight="600">8 scenarios · runs in your browser · scikit-learn code for each</text>
+    <text x="80" y="562" fill="#a3a297" font-size="22">Synthetic data, seeded and reproducible. Free and open source.</text>
+  </g>
+</svg>

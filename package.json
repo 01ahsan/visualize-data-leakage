@@ -16,7 +16,8 @@
     "format:check": "prettier --check .",
     "check": "npm run lint && npm run typecheck && npm run test",
     "screenshot": "node scripts/screenshot.mjs",
-    "social": "node scripts/social-preview.mjs"
+    "social": "node scripts/social-preview.mjs",
+    "prepare": "git config core.hooksPath .githooks || true"
   },
   "dependencies": {
     "react": "18.3.1",

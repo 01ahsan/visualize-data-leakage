@@ -1,0 +1,4 @@
+#!/bin/sh
+# Lint, type-check and test before every commit.
+# Enabled by `npm install` (the "prepare" script sets core.hooksPath).
+npm run --silent check
