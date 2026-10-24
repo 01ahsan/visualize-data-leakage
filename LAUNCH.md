@@ -1,7 +1,7 @@
 # Launch materials
 
-- Site: https://01ahsan.github.io/Data-Leakage-Playground/
-- Code: https://github.com/01ahsan/Data-Leakage-Playground
+- Site: https://01ahsan.github.io/visualize-data-leakage/
+- Code: https://github.com/01ahsan/visualize-data-leakage
 
 All numbers below are from the default settings (seed 42) and can be reproduced on the site.
 
@@ -37,7 +37,7 @@ I'd like feedback on whether the simulations are fair, and which leaks are missi
 
 **Body:**
 
-I built an open-source teaching tool for data leakage: https://01ahsan.github.io/Data-Leakage-Playground/
+I built an open-source teaching tool for data leakage: https://01ahsan.github.io/visualize-data-leakage/
 
 **What it does.** Each scenario simulates a study on synthetic data and reports two scores:
 
@@ -63,7 +63,7 @@ A toggle switches between the leaky and the correct workflow, and a slider chang
 
 **Implementation.** TypeScript implementations of logistic regression (batch GD, L2) and k-NN (exact k-d tree for low-dimensional data), mean per-fold AUC like `cross_val_score`, a seeded mulberry32 PRNG, a Web Worker for the computation, and hand-written SVG charts. It is a static site on GitHub Pages with no tracking. Each scenario includes short wrong and right Python snippets, which I ran against scikit-learn 1.8.
 
-Code (MIT): https://github.com/01ahsan/Data-Leakage-Playground
+Code (MIT): https://github.com/01ahsan/visualize-data-leakage
 
 Feedback welcome, especially on simulation design and on leaks worth adding (for example, normalisation across sites or label leakage through identifiers).
 
@@ -86,7 +86,7 @@ Every scenario includes the wrong and the right scikit-learn code, a chart of th
 
 It's built for teaching: courses, journal clubs, code review checklists. There is also a one-page printable checklist.
 
-https://01ahsan.github.io/Data-Leakage-Playground/
+https://01ahsan.github.io/visualize-data-leakage/
 
 #MachineLearning #DataScience #Reproducibility #HealthData
 
@@ -97,7 +97,7 @@ https://01ahsan.github.io/Data-Leakage-Playground/
 **1/5**
 I built Data Leakage Playground: eight interactive demos of how ML validation scores get inflated, with a Leaky/Correct switch and the score on fresh data next to the reported one.
 Free, open source, runs in your browser.
-https://01ahsan.github.io/Data-Leakage-Playground/
+https://01ahsan.github.io/visualize-data-leakage/
 
 **2/5**
 Clearest case: 80 rows, 1,000 pure-noise features, coin-flip labels.
@@ -118,7 +118,7 @@ The test suite checks each effect, so the numbers can't drift into drama.
 **5/5**
 Each scenario has wrong and right scikit-learn code that runs as is, a gap chart, share links and an iframe embed.
 Based on the Princeton leakage taxonomy and REFORMS checklist.
-Code (MIT): https://github.com/01ahsan/Data-Leakage-Playground
+Code (MIT): https://github.com/01ahsan/visualize-data-leakage
 
 ---
 
