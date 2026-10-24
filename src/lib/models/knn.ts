@@ -9,7 +9,9 @@ export interface KnnOptions {
 
 /** k-nearest neighbours classifier with Euclidean distance. */
 export class KNearestNeighbors implements Classifier {
-  private X: Matrix = [];
+  private flat = new Float64Array(0);
+  private n = 0;
+  private p = 0;
   private y: readonly number[] = [];
   private readonly k: number;
   private readonly distanceWeighted: boolean;
@@ -20,27 +22,32 @@ export class KNearestNeighbors implements Classifier {
   }
 
   fit(X: Matrix, y: readonly number[]): this {
-    this.X = X;
+    this.n = X.length;
+    this.p = X[0]?.length ?? 0;
+    // Training rows are packed into one typed array for a fast distance loop.
+    this.flat = new Float64Array(this.n * this.p);
+    X.forEach((row, i) => this.flat.set(row, i * this.p));
     this.y = y;
     return this;
   }
 
   predictProba(Q: Matrix): number[] {
-    const n = this.X.length;
+    const { n, p, flat } = this;
     const k = Math.min(this.k, n);
     const bestD = new Float64Array(k);
     const bestI = new Int32Array(k);
-    return Q.map((q) => {
+    const q = new Float64Array(p);
+    return Q.map((row) => {
+      q.set(row);
       bestD.fill(Infinity);
-      const p = q.length;
-      for (let i = 0; i < n; i++) {
-        const row = this.X[i];
+      let worst = Infinity;
+      for (let i = 0, base = 0; i < n; i++, base += p) {
         let d = 0;
         for (let j = 0; j < p; j++) {
-          const diff = row[j] - q[j];
+          const diff = flat[base + j] - q[j];
           d += diff * diff;
         }
-        if (d < bestD[k - 1]) {
+        if (d < worst) {
           // Insert into the sorted top-k list.
           let pos = k - 1;
           while (pos > 0 && bestD[pos - 1] > d) {
@@ -50,6 +57,7 @@ export class KNearestNeighbors implements Classifier {
           }
           bestD[pos] = d;
           bestI[pos] = i;
+          worst = bestD[k - 1];
         }
       }
       let num = 0;

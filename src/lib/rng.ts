@@ -42,6 +42,20 @@ export function normal(rng: Rng, mean = 0, sd = 1): number {
   return mean + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 }
 
+/** `count` standard normal samples, using both outputs of each Box-Muller pair. */
+export function normals(rng: Rng, count: number): Float64Array {
+  const out = new Float64Array(count);
+  for (let i = 0; i < count; i += 2) {
+    let u = 0;
+    while (u === 0) u = rng();
+    const r = Math.sqrt(-2 * Math.log(u));
+    const theta = 2 * Math.PI * rng();
+    out[i] = r * Math.cos(theta);
+    if (i + 1 < count) out[i + 1] = r * Math.sin(theta);
+  }
+  return out;
+}
+
 /** 1 with probability p, else 0. */
 export function bernoulli(rng: Rng, p: number): number {
   return rng() < p ? 1 : 0;
