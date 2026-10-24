@@ -32,8 +32,8 @@ export function ReadingTip() {
           <strong>Drag</strong> the slider to make the leak stronger or weaker.
         </li>
         <li>
-          <strong>Compare</strong> the coloured dot (the score the study reports) with the dark dot
-          (the score on new patients). The wider the gap, the more the score misleads.
+          <strong>Compare</strong> the orange or blue dot (the score the study reports) with the
+          green dot (the score on new patients). The wider the gap, the more the score misleads.
         </li>
       </ol>
       <button type="button" className="button" onClick={close}>

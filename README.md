@@ -19,7 +19,7 @@ Data leakage happens when information from the test data slips into training, so
 - **Printable checklist** of eight checks.
 - **Honest effects.** The simulations are tuned for realistic settings, not for drama. Preprocessing on all data, for example, leaks very little here, and the page says so.
 - **Static and private.** No backend, cookies, analytics or external requests. Data is synthetic and generated with a seeded PRNG, so results are identical for everyone.
-- Light and dark themes from the system setting, keyboard accessible, readable at 360 px wide.
+- Colourful light theme by default with an opt-in dark theme (remembered in the browser), keyboard accessible, readable at 360 px wide.
 
 Default results (seed 42, ROC AUC):
 

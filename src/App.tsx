@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { About } from './pages/About';
+import { ThemeToggle } from './components/ThemeToggle';
 import { Checklist } from './pages/Checklist';
 import { Home } from './pages/Home';
 import { ScenarioPage } from './pages/Scenario';
@@ -83,6 +84,7 @@ export function App() {
           <a href="#/about" aria-current={route.page === 'about' ? 'page' : undefined}>
             About
           </a>
+          <ThemeToggle />
         </nav>
       </header>
       <main id="main" tabIndex={-1}>

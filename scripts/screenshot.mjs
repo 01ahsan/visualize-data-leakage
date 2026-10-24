@@ -22,12 +22,13 @@ const browser = await chromium.launch(launchOptions);
 mkdirSync('docs', { recursive: true });
 mkdirSync('scripts/output', { recursive: true });
 
-async function shoot(path, file, { width, height, colorScheme = 'light', fullPage = false }) {
+async function shoot(path, file, { width, height, theme = 'light', fullPage = false }) {
   const page = await browser.newPage({
     viewport: { width, height },
-    colorScheme,
     deviceScaleFactor: 2,
   });
+  // Runs in the page before load, so the site starts in the chosen theme.
+  if (theme === 'dark') await page.addInitScript("localStorage.setItem('dlp-theme', 'dark')");
   await page.goto(`${base}${path}`);
   if (path.includes('scenario')) {
     await page.getByText('dot = your setting', { exact: false }).waitFor({ timeout: 30000 });
@@ -52,7 +53,7 @@ if (!process.argv.includes('--readme-only')) {
   await shoot(scenario, 'scripts/output/scenario-dark.png', {
     width: 1200,
     height: 1050,
-    colorScheme: 'dark',
+    theme: 'dark',
   });
   await shoot(
     '#/scenario/same-patient?mode=correct&strength=4&seed=42',

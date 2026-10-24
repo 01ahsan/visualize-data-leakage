@@ -16,7 +16,7 @@ const STEPS = [
   },
   {
     title: 'Watch the gap',
-    text: 'Orange is the score the analysis would publish. Dark is what the model really scores on new patients.',
+    text: 'Orange is the score the analysis would publish. Green is what the model really scores on new patients.',
   },
 ];
 

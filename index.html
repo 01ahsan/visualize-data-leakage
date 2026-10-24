@@ -8,9 +8,8 @@
       name="description"
       content="Switch a machine learning data leak on and off, watch the reported score inflate, and see what a new hospital would really get. Eight interactive scenarios with scikit-learn code."
     />
-    <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#fcfcfb" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#1a1a19" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f3f6fb" />
     <meta property="og:title" content="Data Leakage Playground" />
     <meta
       property="og:description"
@@ -18,6 +17,13 @@
     />
     <meta property="og:type" content="website" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <script>
+      // Light by default; dark only if the visitor chose it before (no flash on load).
+      try {
+        if (localStorage.getItem('dlp-theme') === 'dark')
+          document.documentElement.dataset.theme = 'dark';
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
