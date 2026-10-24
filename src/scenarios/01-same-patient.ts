@@ -4,9 +4,8 @@ import { stream } from '../lib/rng';
 import { groupKFold, stratifiedKFold } from '../lib/split';
 import { crossValAuc, defineScenario, fitAndScore, SALT } from './define';
 
-/** Visits in the study; the number of patients is this divided by visits per patient. */
-const VISITS_TOTAL = 1600;
-const NEW_HOSPITAL_VISITS = 1200;
+const PATIENTS = 350;
+const NEW_PATIENTS = 300;
 const DIMS = 8;
 const SIGNAL = 1.2;
 const RECORD_NOISE = 0.15;
@@ -22,11 +21,11 @@ export default defineScenario({
     'A hospital has several visits per patient. Splitting visits at random puts some of a patient’s visits in training and others in testing.',
   explanation:
     'Visits from the same person look alike, so a model can recognise the patient instead of learning the disease. k-nearest neighbours does exactly that: the closest training rows to a test visit are that patient’s other visits, which carry the same diagnosis. The random split rewards this memory, and the score drops on patients the model has never seen. Split by patient (GroupKFold) so each person is entirely in training or entirely in testing. With one visit per patient there is nothing to memorise and both splits agree.',
-  setup: `${VISITS_TOTAL} visits (fewer patients when each has more visits), 8 features, k-NN (k = 10), 5-fold cross-validation. New hospital: ${NEW_HOSPITAL_VISITS} visits from new patients.`,
+  setup: `${PATIENTS} patients, 8 features, k-NN (k = 10), 5-fold cross-validation. New hospital: ${NEW_PATIENTS} new patients.`,
   strength: {
     label: 'Visits per patient',
     min: 1,
-    max: 8,
+    max: 6,
     step: 1,
     default: 4,
     hint: 'More visits per patient give the model more chances to recognise a person.',
@@ -39,16 +38,13 @@ export default defineScenario({
       recordNoise: RECORD_NOISE,
       recordsPerPatient: visits,
     };
-    const dev = makePatients(
-      { ...opts, nPatients: Math.round(VISITS_TOTAL / visits) },
-      stream(seed, SALT.data),
-    );
+    const dev = makePatients({ ...opts, nPatients: PATIENTS }, stream(seed, SALT.data));
     const folds = leaky
       ? stratifiedKFold(dev.y, 5, stream(seed, SALT.split))
       : groupKFold(dev.groups as number[], 5, stream(seed, SALT.split));
     const reportedScore = crossValAuc(dev.X, dev.y, folds, makeModel);
     const newHospital = makePatients(
-      { ...opts, nPatients: Math.round(NEW_HOSPITAL_VISITS / visits), firstId: 1_000_000 },
+      { ...opts, nPatients: NEW_PATIENTS, firstId: 1_000_000 },
       stream(seed, SALT.newHospital),
     );
     return { reportedScore, newHospitalScore: fitAndScore(dev, newHospital, makeModel) };
