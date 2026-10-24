@@ -30,9 +30,7 @@ async function shoot(path, file, { width, height, colorScheme = 'light', fullPag
   });
   await page.goto(`${base}${path}`);
   if (path.includes('scenario')) {
-    await page
-      .getByText('The vertical line marks the current setting.')
-      .waitFor({ timeout: 30000 });
+    await page.getByText('dot = your setting', { exact: false }).waitFor({ timeout: 30000 });
     await page.waitForTimeout(600); // let the meter animation settle
   }
   await page.screenshot({ path: file, fullPage });
@@ -41,7 +39,7 @@ async function shoot(path, file, { width, height, colorScheme = 'light', fullPag
 }
 
 const scenario = '#/scenario/feature-selection?mode=leaky&strength=1000&seed=42';
-await shoot(scenario, 'docs/screenshot.png', { width: 1200, height: 1050 });
+await shoot(scenario, 'docs/screenshot.png', { width: 1100, height: 900 });
 
 if (!process.argv.includes('--readme-only')) {
   await shoot('#/', 'scripts/output/home.png', { width: 1200, height: 900 });

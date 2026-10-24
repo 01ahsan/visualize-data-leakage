@@ -79,3 +79,12 @@ describe.each(scenarios.map((s) => [s.id, s] as const))('scenario %s', (_, s) =>
 it('scenario ids are unique', () => {
   expect(new Set(scenarios.map((s) => s.id)).size).toBe(scenarios.length);
 });
+
+it('home-page previews match the simulations', async () => {
+  const { previews, PREVIEW_SEED } = await import('../src/scenarios/previews');
+  for (const s of scenarios) {
+    const e = s.evaluate({ leaky: true, strength: s.strength.default, seed: PREVIEW_SEED });
+    expect(previews[s.id].reported).toBeCloseTo(e.reportedScore, 2);
+    expect(previews[s.id].newHospital).toBeCloseTo(e.newHospitalScore, 2);
+  }
+});

@@ -12,8 +12,8 @@ Data leakage happens when information from the test data slips into training, so
 
 - **Eight scenarios:** same patient in train and test, preprocessing on all data, feature selection on all data, duplicate records, target leakage, time leakage, tuning on the test set, oversampling before splitting.
 - **Leaky / Correct toggle** and a **strength slider** for each scenario (for example, visits per patient or the share of duplicated rows).
-- **Three meters:** reported score, new hospital score, and the gap between them (ROC AUC).
-- **Gap chart** across the whole slider range, for both workflows, with a data table.
+- **Score scale:** the reported score and the new hospital score as two dots on one ROC AUC scale, with the gap between them shaded and stated.
+- **Gap chart** across the whole slider range, for both workflows, with a marker for your setting and a data table.
 - **Runnable Python** for the wrong and right versions, with copy buttons. Every snippet runs as is with NumPy and scikit-learn.
 - **Share links** that encode scenario, mode, strength and seed, and an **embed snippet** (iframe, compact mode) for course pages.
 - **Printable checklist** of eight checks.

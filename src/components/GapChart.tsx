@@ -9,15 +9,16 @@ interface GapChartProps {
   strengths: number[];
   strength: StrengthParam;
   current: number;
+  /** Gap at the current setting, for the "you are here" marker. */
+  currentGap: number | null;
   leaky: boolean;
 }
 
-const HEIGHT = 260;
-const M = { top: 16, right: 76, bottom: 44, left: 48 };
+const HEIGHT = 220;
+const M = { top: 14, right: 64, bottom: 36, left: 44 };
 
 function niceTicks(min: number, max: number): number[] {
-  const span = max - min;
-  const step = span > 0.6 ? 0.2 : span > 0.3 ? 0.1 : 0.05;
+  const step = max - min > 0.45 ? 0.2 : 0.1;
   const ticks: number[] = [];
   for (let v = Math.ceil(min / step) * step; v <= max + 1e-9; v += step) {
     ticks.push(Math.round(v * 100) / 100);
@@ -31,6 +32,7 @@ export function GapChart({
   strengths,
   strength,
   current,
+  currentGap,
   leaky,
 }: GapChartProps) {
   const [wrapRef, width] = useElementWidth<HTMLDivElement>();
@@ -38,36 +40,37 @@ export function GapChart({
   const fmtX = strength.format ?? ((v: number) => String(v));
 
   const gaps = [...leakyCurve, ...correctCurve].map((p) => p.gap);
-  const yMin = Math.min(-0.1, Math.floor(Math.min(0, ...gaps) / 0.05) * 0.05);
-  const yMax = Math.max(0.1, Math.ceil(Math.max(0, ...gaps) / 0.05) * 0.05);
+  const yMin = Math.min(-0.1, Math.floor(Math.min(0, ...gaps) / 0.1) * 0.1);
+  const yMax = Math.max(0.2, Math.ceil(Math.max(0, ...gaps) / 0.1) * 0.1);
   const innerW = Math.max(10, width - M.left - M.right);
   const innerH = HEIGHT - M.top - M.bottom;
   const x = (v: number) => M.left + ((v - strength.min) / (strength.max - strength.min)) * innerW;
   const y = (v: number) => M.top + ((yMax - v) / (yMax - yMin)) * innerH;
-  const path = (pts: CurvePoint[]) =>
+  const line = (pts: CurvePoint[]) =>
     pts
       .map((p, i) => `${i ? 'L' : 'M'}${x(p.strength).toFixed(1)},${y(p.gap).toFixed(1)}`)
       .join('');
+  const area = (pts: CurvePoint[]) =>
+    pts.length < 2
+      ? ''
+      : `${line(pts)}L${x(pts[pts.length - 1].strength).toFixed(1)},${y(0)}L${x(pts[0].strength).toFixed(1)},${y(0)}Z`;
 
   const series = [
     { key: 'correct', name: 'Correct', pts: correctCurve, color: 'var(--correct)', active: !leaky },
     { key: 'leaky', name: 'Leaky', pts: leakyCurve, color: 'var(--leaky)', active: leaky },
   ];
-  // Draw the active series last so it sits on top.
   const ordered = series.slice().sort((a, b) => Number(a.active) - Number(b.active));
   const total = strengths.length * 2;
   const done = leakyCurve.length + correctCurve.length;
 
   const onPointerMove = (e: React.PointerEvent<SVGRectElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const px = e.clientX - rect.left + M.left;
+    const px = e.clientX - e.currentTarget.getBoundingClientRect().left + M.left;
     let best = 0;
     strengths.forEach((s, i) => {
       if (Math.abs(x(s) - px) < Math.abs(x(strengths[best]) - px)) best = i;
     });
     setHover(best);
   };
-
   const hoverStrength = hover === null ? null : strengths[hover];
   const valueAt = (pts: CurvePoint[], s: number) => pts.find((p) => p.strength === s)?.gap;
 
@@ -84,25 +87,13 @@ export function GapChart({
 
   return (
     <div className="chart">
-      <div className="chart-legend" aria-hidden="true">
-        {series.map((s) => (
-          <span key={s.key} className={`legend-item ${s.active ? 'active' : ''}`}>
-            <span className="legend-swatch" style={{ background: s.color }} />
-            {s.name}
-          </span>
-        ))}
-        <span className="legend-item">
-          <span className="legend-band" />
-          Sampling noise (±{NOISE_BAND.toFixed(2)})
-        </span>
-      </div>
       <div className="chart-wrap" ref={wrapRef}>
         {width > 0 && (
           <svg
             width={width}
             height={HEIGHT}
             role="img"
-            aria-label={`Line chart of the gap between reported and new hospital score across ${strength.label.toLowerCase()}, for leaky and correct workflows. The data table below lists the values.`}
+            aria-label={`Gap between reported and new hospital score across ${strength.label.toLowerCase()}, for the leaky and the correct workflow. A data table follows.`}
           >
             <rect
               x={M.left}
@@ -113,19 +104,22 @@ export function GapChart({
             />
             {niceTicks(yMin, yMax).map((t) => (
               <g key={t}>
-                <line
-                  x1={M.left}
-                  x2={M.left + innerW}
-                  y1={y(t)}
-                  y2={y(t)}
-                  className={t === 0 ? 'chart-zero' : 'chart-grid'}
-                />
+                {t !== 0 && (
+                  <line
+                    x1={M.left}
+                    x2={M.left + innerW}
+                    y1={y(t)}
+                    y2={y(t)}
+                    className="chart-grid"
+                  />
+                )}
                 <text x={M.left - 8} y={y(t)} dy="0.32em" textAnchor="end" className="chart-tick">
                   {fmtGap(t)}
                 </text>
               </g>
             ))}
-            {strengths.map((s) => (
+            <line x1={M.left} x2={M.left + innerW} y1={y(0)} y2={y(0)} className="chart-zero" />
+            {[strengths[0], strengths[strengths.length - 1]].map((s) => (
               <text
                 key={s}
                 x={x(s)}
@@ -138,41 +132,24 @@ export function GapChart({
             ))}
             <text
               x={M.left + innerW / 2}
-              y={HEIGHT - 6}
+              y={M.top + innerH + 18}
               textAnchor="middle"
               className="chart-axis-label"
             >
-              {strength.label}
+              {strength.label} →
             </text>
-            <line
-              x1={x(current)}
-              x2={x(current)}
-              y1={M.top}
-              y2={M.top + innerH}
-              className="chart-current"
-            />
+            <path d={area(leakyCurve)} fill="var(--leaky)" opacity={leaky ? 0.12 : 0.06} />
             {ordered.map((s) => (
-              <g key={s.key} opacity={s.active ? 1 : 0.55}>
-                <path
-                  d={path(s.pts)}
-                  fill="none"
-                  stroke={s.color}
-                  strokeWidth={s.active ? 2.5 : 2}
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                />
-                {s.pts.map((p) => (
-                  <circle
-                    key={p.strength}
-                    cx={x(p.strength)}
-                    cy={y(p.gap)}
-                    r={4}
-                    fill={s.color}
-                    stroke="var(--surface)"
-                    strokeWidth={2}
-                  />
-                ))}
-              </g>
+              <path
+                key={s.key}
+                d={line(s.pts)}
+                fill="none"
+                stroke={s.color}
+                strokeWidth={s.active ? 2.5 : 2}
+                opacity={s.active ? 1 : 0.5}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
             ))}
             {ends.map((s) => (
               <text
@@ -180,11 +157,20 @@ export function GapChart({
                 x={M.left + innerW + 8}
                 y={s.ly}
                 dy="0.32em"
-                className="chart-direct-label"
+                className={s.active ? 'chart-direct-label active' : 'chart-direct-label'}
               >
                 {s.name}
               </text>
             ))}
+            {currentGap !== null && (
+              <circle
+                cx={x(current)}
+                cy={y(currentGap)}
+                r={7}
+                fill={leaky ? 'var(--leaky)' : 'var(--correct)'}
+                className="chart-here"
+              />
+            )}
             {hoverStrength !== null && (
               <line
                 x1={x(hoverStrength)}
@@ -208,10 +194,7 @@ export function GapChart({
         {hoverStrength !== null && (
           <div
             className="chart-tooltip"
-            style={{
-              left: Math.min(x(hoverStrength) + 12, Math.max(0, width - 170)),
-              top: M.top,
-            }}
+            style={{ left: Math.min(x(hoverStrength) + 12, Math.max(0, width - 170)), top: M.top }}
             aria-hidden="true"
           >
             <div className="tooltip-title">
@@ -230,39 +213,45 @@ export function GapChart({
           </div>
         )}
       </div>
-      <p className="muted small" aria-live="polite">
-        {done < total
-          ? `Computing the curve… ${done} of ${total} points`
-          : 'The vertical line marks the current setting.'}
-      </p>
-      <details className="chart-table">
-        <summary>Show the data table</summary>
-        <table>
-          <caption className="visually-hidden">
-            Gap (reported minus new hospital) by {strength.label.toLowerCase()}
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col">{strength.label}</th>
-              <th scope="col">Leaky gap</th>
-              <th scope="col">Correct gap</th>
-            </tr>
-          </thead>
-          <tbody>
-            {strengths.map((s) => {
-              const l = valueAt(leakyCurve, s);
-              const c = valueAt(correctCurve, s);
-              return (
-                <tr key={s}>
-                  <th scope="row">{fmtX(s)}</th>
-                  <td>{l === undefined ? '…' : fmtGap(l)}</td>
-                  <td>{c === undefined ? '…' : fmtGap(c)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </details>
+      <div className="chart-foot">
+        <span className="chart-note" aria-live="polite">
+          {done < total ? `Computing… ${done}/${total}` : null}
+          {done >= total && (
+            <>
+              <span className="legend-band" aria-hidden="true" /> ±{NOISE_BAND.toFixed(2)} noise
+              band · dot = your setting
+            </>
+          )}
+        </span>
+        <details className="chart-table">
+          <summary>Data table</summary>
+          <table>
+            <caption className="visually-hidden">
+              Gap (reported minus new hospital) by {strength.label.toLowerCase()}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">{strength.label}</th>
+                <th scope="col">Leaky gap</th>
+                <th scope="col">Correct gap</th>
+              </tr>
+            </thead>
+            <tbody>
+              {strengths.map((s) => {
+                const l = valueAt(leakyCurve, s);
+                const c = valueAt(correctCurve, s);
+                return (
+                  <tr key={s}>
+                    <th scope="row">{fmtX(s)}</th>
+                    <td>{l === undefined ? '…' : fmtGap(l)}</td>
+                    <td>{c === undefined ? '…' : fmtGap(c)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </details>
+      </div>
     </div>
   );
 }
