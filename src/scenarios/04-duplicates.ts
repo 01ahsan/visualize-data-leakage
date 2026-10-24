@@ -64,7 +64,8 @@ y, ids = np.concatenate([y, y[dup]]), np.concatenate([ids, ids[dup]])
 # Wrong: copies of the same record fall into train and test
 knn = KNeighborsClassifier(15, weights="distance")
 cv = StratifiedKFold(5, shuffle=True, random_state=0)
-print(cross_val_score(knn, X, y, cv=cv, scoring="roc_auc").mean())`,
+auc = cross_val_score(knn, X, y, cv=cv, scoring="roc_auc")
+print(f"Reported AUC: {auc.mean():.2f}")`,
   rightCode: `import numpy as np
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.neighbors import KNeighborsClassifier
@@ -82,5 +83,6 @@ _, first = np.unique(ids, return_index=True)
 X, y = X[first], y[first]
 knn = KNeighborsClassifier(15, weights="distance")
 cv = StratifiedKFold(5, shuffle=True, random_state=0)
-print(cross_val_score(knn, X, y, cv=cv, scoring="roc_auc").mean())`,
+auc = cross_val_score(knn, X, y, cv=cv, scoring="roc_auc")
+print(f"Reported AUC: {auc.mean():.2f}")`,
 });

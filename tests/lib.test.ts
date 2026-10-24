@@ -114,3 +114,20 @@ describe('models', () => {
     expect(Math.abs(rocAuc(noiseTest.y, lr.predictProba(noiseTest.X)) - 0.5)).toBeLessThan(0.05);
   });
 });
+
+describe('k-NN tree search', () => {
+  it('matches a brute-force neighbour search', () => {
+    const rng = mulberry32(31);
+    const X = Array.from({ length: 500 }, () => [normal(rng), normal(rng), normal(rng)]);
+    const y = X.map((r) => (r[0] + normal(rng) > 0 ? 1 : 0));
+    const Q = Array.from({ length: 50 }, () => [normal(rng), normal(rng), normal(rng)]);
+    const k = 7;
+    const brute = Q.map((q) => {
+      const d = X.map((r, i) => ({ i, d: r.reduce((s, v, j) => s + (v - q[j]) ** 2, 0) }));
+      d.sort((a, b) => a.d - b.d);
+      return d.slice(0, k).reduce((s, e) => s + y[e.i], 0) / k;
+    });
+    const tree = new KNearestNeighbors({ k }).fit(X, y).predictProba(Q);
+    tree.forEach((v, i) => expect(v).toBeCloseTo(brute[i], 10));
+  });
+});

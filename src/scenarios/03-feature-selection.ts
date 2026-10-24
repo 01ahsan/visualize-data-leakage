@@ -90,5 +90,5 @@ y = rng.integers(0, 2, 80)        # coin-flip labels
 # Right: selection is refitted inside each training fold
 model = make_pipeline(SelectKBest(f_classif, k=10), LogisticRegression())
 auc = cross_val_score(model, X, y, cv=5, scoring="roc_auc")
-print(f"Reported AUC: {auc.mean():.2f}")  # close to 0.5`,
+print(f"Reported AUC: {auc.mean():.2f}")  # chance level; one 80-row study can land 0.15 either side`,
 });
